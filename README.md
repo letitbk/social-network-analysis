@@ -1,2 +1,2 @@
-# social-network-analysis
-Code Repository for Social Network Analysis 5th edition
+# 사회 연결망 분석 (제 5판)
+사회 연결망 분석 제 5판의(김용학, 김영진, 이병규 공저) 실습을 위한 데이터, 코드 저장소입니다. 

@@ -5,27 +5,32 @@
 ## C기업의 ‘비공식(좌)’, ‘공식(우)’ 연결망" 시각화하기 
 net_informal <- read.csv('files/company_c_informal_edges.csv')
 net_formal <- read.csv('files/company_c_formal_edges.csv')
+
 ### 연결망 그래프로 전환  
 library(igraph)
 g_informal <- graph_from_data_frame(net_informal, directed = TRUE)
 g_formal <- graph_from_data_frame(net_formal, directed = TRUE)
-### 다른 그래프에서 노드가 같은 위치에 고정되기 위해서 layout을 설정 
-lay <- layout_with_kk(g_informal) # 노드들의 위치 정보를 저장
+
+# 다른 그래프에서 노드가 같은 위치에 고정되기 위해서 layout을 설정 
+l <- layout_with_kk(g_informal) # 노드들의 위치 정보를 저장
+
 ###  연결망 그래프 시각화 표현 
-par(mfrow=c(1,2)) # R에서 그래프를 1행 2열(1, 2)의 panel로 보여주기 위한 장치
+par(mfrow=c(1,2)) # 그래프를 1행 2열(1, 2)의 panel로 보여주기 위한 장치
 par(mar = c(0.1, 0.1, 0.1, 0.1)) # 그래프의 여백 조정
-plot(g_informal, 
-  layout = lay, vertex.label.cex = 0.7, edge.arrow.size = 0.5)
-plot(g_formal, 
-  layout = lay, vertex.label.cex = 0.7, edge.arrow.size = 0.5)
+plot(g_informal, layout=l, vertex.label.cex=0.7, edge.arrow.size=0.5)
+plot(g_formal, layout=l, vertex.label.cex=0.7, edge.arrow.size=0.5)
+dev.off()
 
 ## 연결중앙성(Degree Centrality)
 ### 외향연결정도
 outdegree <- degree(g_informal, mode = 'out', loops = FALSE)
+
 ### 외향연결정도 높은 순서대로 10명의 외향연결정도를 나타내기
 outdegree[order(outdegree, decreasing = TRUE)][1:10]
+
 ### 내향연결정도
 indegree <- degree(g_informal, mode = 'in', loops = FALSE)
+
 ### 내향연결정도 높은 순서대로 10명의 내향연결정도를 나타내기
 indegree[order(indegree, decreasing = TRUE)][1:10]
 
@@ -42,8 +47,10 @@ top_10(degree_all)
 
 ### 방향성을 고려하지 않은 연결망 자료를 뽑아낼 것
 g_informal_s <- graph_from_data_frame(net_informal, directed = FALSE)
+
 ### 연결망을 단순화 하기
 g_informal_simpl <- simplify(g_informal_s)
+
 ### 방향성을 고려하지 않은  전체 연결정도의 계산
 undirected_degree <- degree(g_informal_simpl)
 top_10(undirected_degree)
@@ -68,19 +75,18 @@ df_degrees <- data.frame(
 df_degrees[1:10,]
 
 ### 연결중앙성 지표의 시각화 표현 'out(좌)', 'in(중)', 'undirected(우)'
-#### 그래프 3개를 한 번에 표현하기 위해서 1*3 격자 설정 
+# 그래프 3개를 한 번에 표현하기 위해서 1*3 격자 설정 
 par(mfrow=c(1,3))
-
-#### 공간 활용을 위한 작은 여백을 설정 
+# 공간 활용을 위한 작은 여백을 설정 
 par(mar = c(0.1, 0.1, 0.1, 0.1))
-#### 연결망 노드 크기를 outdegree에 비례하여 시각화
-plot(g_informal, layout = lay, edge.arrow.size = 0.3, 
+# 연결망 노드 크기를 outdegree에 비례하여 시각화
+plot(g_informal, layout = l, edge.arrow.size = 0.3, 
      vertex.size = outdegree * 1.5)
-#### 연결망 노드 크기를 indegree에 비례하여 시각화
-plot(g_informal, layout = lay, edge.arrow.size = 0.3, 
+# 연결망 노드 크기를 indegree에 비례하여 시각화
+plot(g_informal, layout = l, edge.arrow.size = 0.3, 
      vertex.size = indegree * 1.5)
-#### 연결망 노드 크기를 undirected_degree에 비례하여 시각화
-plot(g_informal, layout = lay, edge.arrow.size = 0, 
+# 연결망 노드 크기를 undirected_degree에 비례하여 시각화
+plot(g_informal, layout = l, edge.arrow.size = 0, 
      vertex.size = undirected_degree * 1.5)
 dev.off()
 
@@ -125,6 +131,7 @@ round(top_10(incloseness), 4)
 
 ## 확산중앙성
 library(keyplayer)
+
 # 그래프 개체를 인접행렬로 변환
 adj_informal <- as_adjacency_matrix(
   g_informal,
@@ -133,6 +140,7 @@ adj_informal <- as_adjacency_matrix(
   names = TRUE,
   sparse = igraph_opt("sparsematrices")
 )
+
 # 정보 전달 확률을 0.5로 가정
 P <- adj_informal * 0.5
 # 확산이 2번에 걸쳐서 발생한다고 가정
@@ -140,11 +148,12 @@ top_10(diffusion(P, T = 2))
 
 ## 링크 사이중앙성(edge betweenness)
 edgebetweenness <- edge_betweenness(g_informal)
-plot(g_informal, layout =lay, vertex.label.cex= 0.7, 
+plot(g_informal, layout =l, vertex.label.cex= 0.7, 
         vertex.cex= 0.7, edge.arrow.size=0.5, 
         edge.width=edgebetweenness/10, 
         edge.label= round(edgebetweenness, 0) , 
         edge.label.cex= 0.8 
+)
 
 ## 페이지랭크(PageRank) 
 page_rank <- igraph::page_rank(g_informal)$vector

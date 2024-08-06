@@ -2,7 +2,6 @@
 #               제 10 장             #
 #####################################
 
-#install.packages('data.table')
 library(data.table)
 library(readxl)
 
@@ -27,6 +26,7 @@ dt_alter$alter_educ <- factor(dt_alter$alter_educ,
 # 함수를 불러들임
 #install.packages('egor')
 library(egor)
+
 # egor 함수로 변환하기
 egor_g <- egor(
     # alter_id가 missing인 경우는 제외하고 alter의 정보를 저장
@@ -98,9 +98,12 @@ new_g1 <- induced.subgraph(g1,
 # 연결망 크기 계산
 vcount(new_g1)
 
-# lapply를 활용하여 전체를 반복해서 계산하기
+### lapply를 활용하여 전체를 반복해서 계산하기
+
+# egor object를 igraph object로 변환
 igraph_g <- as_igraph(egor_g, include.ego = FALSE)
 
+# lapply를 활용하여 전체를 반복해서 계산하기
 vcount_higheduc <- lapply(1:length(igraph_g), function(i){
     # i 번째 객체 (연결망 그래프)를 추출
     g1 <- igraph_g[[i]]
@@ -122,6 +125,8 @@ new_g1 <- induced.subgraph(g1, V(g1)[V(g1)$alter_freq %in% c('매일')])
 
 # 연결망 크기 계산
 vcount(new_g1)
+# 위에서 이용한 lapply를 활용하여 반복적인 계산할 수 있을 것이다.
+
 
 #### 연결 강도
 # 먼저 하나의 network를 뽑아서 계산을 해보자
@@ -138,6 +143,8 @@ mean(g1_strength)
 sum(g1_strength == 7)
 
 # 표준편차 계산하기:
+# R에서 제공하는 sd는 표본의 표준편차를 계산하므로
+# 모집단의 표준편차를 계산하기 위해서는 다음과 같이 계산한다.
 pop_sd <- function(x){
     sd(x) / (length(x) - 1) * length(x)
 }
@@ -197,12 +204,16 @@ dist_ed(y = g1_alter_age, x = g1_ego_age)
 
 #### 타자 간의 유사성 지표
 # 블라우의 지수(Blau's Index)
+# 그래프를 끄집어내기
 g1 <- egor_g[1]
+
+# igraph로 변환하기
 g1 <- egor::as_igraph(g1, include.ego = F)[[1]]
 
 # ego의 속성 찾기: educ
 g1_alter_educ = V(g1)$alter_educ
 
+# blau 지수 계산하기
 blau_index = function(x, attr){
     pk <- rep(0, length(attr))
     names(pk) <- attr
@@ -223,12 +234,13 @@ k <- length(c('no educ', 'hs','some_college','college'))
 iqv <- blau / (1 - 1 / k)
 
 # 표준편차와 변동계수
+# 먼저 age 속성을 뽑아보자
 g1_alter_age = V(g1)$alter_age
 
-# 표준편차
+# 표준편차 계산
 sd(g1_alter_age)
 
-# 변동계수
+# 변동계수 계
 sd(g1_alter_age) / mean(g1_alter_age)
 
 ### 타자들의 관계 기반 지표
@@ -274,7 +286,7 @@ brole <- sna::brokerage(net, cl = network::get.vertex.attribute(net, 'alter_educ
 brole[rownames(brole) %in% 'ego',]
 
 ## 자아 중심 연결망 분석을 통한 사회 중심 연결망 패턴 추론
-# 입력한 자료를 읽어들임.
+# GSS 자료를 읽어들임
 # 이 자료에서 id는 ego의 id를 의미하고, 
 # alter_id는 각 ego의 alter들의 ID를 의미한다. 
 # ego_로 시작되는 변수들은 ego의 속성을 나타내며, 
@@ -329,6 +341,7 @@ gss_egor_g$alter$race <- factor(gss_egor_g$alter$race,
     level = c(1, 2, 3, 4, 5),
     labels = c('기타', '흑인','기타','백인','기타'))
 
+# 혼합행렬의 계산
 mixingmatrix(gss_egor_g, 'race')
 
 mixing_race <- mixingmatrix(gss_egor_g, 'race')

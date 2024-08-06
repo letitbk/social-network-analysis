@@ -58,7 +58,7 @@ edgelist <- matrix(
 g2 <- graph_from_edgelist(edgelist, directed = TRUE)
 
 ### g2 객체를 시각화하기 
-plot(g2, vertex.size = 0.3, edge.arrow.size = 0.5)
+plot(g2, vertex.size = 15, vertex.label.cex= 0.6, edge.arrow.size = 0.5)
 
 ### g1, g2 동일여부 확인하기 
 identical_graphs(g1, g2)
@@ -71,28 +71,28 @@ el <- matrix( c('John', 'Alice',
               nc = 2, byrow = TRUE)
 
 g3 <- graph_from_edgelist(el, directed = TRUE)
-plot(g3, vertex.size = 0.3, edge.arrow.size = 0.5)
+plot(g3, vertex.shape = 'none', edge.arrow.size = 0.5)
 
 ### 파일에서 연결망 자료 읽어들이기 
 library(readxl)
 edgelist2 <- read_excel('files/ex_3_1_read_excel.xlsx')
-edgelist2
+print(edgelist2)
 
 ### 그래프 객체로 변환하여 시각화하기 
 g4 <- graph_from_data_frame(edgelist2, directed = TRUE)
-plot(g4, vertex.size = 0.3, edge.arrow.size = 0.5)
+plot(g4, vertex.size = 15, vertex.label.cex= 0.6, edge.arrow.size = 0.5)
 
 ## 노드목록(nodelist)
 ### graph_from_literal 함수로 방향성이 없는 그래프 생성하고 시각화 
 g5 <- graph_from_literal(Alice-Bob-Cecil-Alice, 
                          Daniel-Cecil-Eugene,
                          Cecil-Gordon )
-plot(g5, vertex.size = 0.3, edge.arrow.size = 0.5)
+plot(g5, vertex.shape = 'none')
 
 ### graph_from_literal 함수로 방향성이 있는 그래프 생성하고 시각화 
 g6 <- graph_from_literal( Alice +-+ Bob --+ Cecil +-- Daniel,
                      Eugene --+ Gordon:Helen )
-plot(g6, vertex.size = 0.3, edge.arrow.size = 0.5)
+plot(g6, vertex.shape = 'none', edge.arrow.size = 0.5)
 
 ## 이원 연결망 자료 
 ### 행=4, 열=5개인 사건 행렬을 incm이라는 이름으로 입력하기 
@@ -119,7 +119,7 @@ plot(g_inc,
      vertex.size = 15, vertex.label.cex= 0.6,
      vertex.color=c('green', 'cyan')[V(g_inc)$type+1])
 
-### 1 사람 - 이벤트 이원 자료 입력 하기 
+# 1 사람 - 이벤트 이원 자료 입력 하기 
 edgelist <- read.table(text='1 A
                              1 B
                              1 D
@@ -131,14 +131,16 @@ edgelist <- read.table(text='1 A
                              3 E
                              4 E',                        
                              header=TRUE)
-### 2
-twomodenetwork <- graph.data.frame(edgelist)
+# 2 edgelist를 graph_from_data_frame()으로 변환하기 
+twomodenetwork <- graph_from_data_frame(edgelist, directed = FALSE)
 
-### 3
-plot(twomodenetwork, vertex.size = 0.3, edge.arrow.size = 0.5) 
+#3 시각화하기 
+plot(twomodenetwork, vertex.size = 15, vertex.label.cex= 0.6) 
 
 ### 위 edgelist에서 두 번째 열(evnet)에 속한 name이면 TRUE, 그렇지 않으면 FALSE 
 V(twomodenetwork)$type <- V(twomodenetwork)$name %in% edgelist[,2] 
+
+# 이원 연결망 객체 시각화하기 
 plot(twomodenetwork, 
      layout = layout_bipartite, 
      vertex.size = 15, vertex.label.cex= 0.6,
@@ -169,11 +171,11 @@ tincm %*% incm ## Event * Event matrix
 ego_g <- graph_from_literal( A-B, A-C, A-D, A-E, A-F, 
                          B-C,
                          C-D, C-E, D-E )
-plot(ego_g, vertex.size = 15, vertex.label.cex= 0.6, edge.arrow.size = 0.5)
+plot(ego_g, vertex.size = 15, vertex.label.cex= 0.6)
 
 ### 자아를 제외한 그래프 생성하기
 ego_g_exclude <- induced_subgraph(ego_g, c('B', 'C', 'D', 'E', 'F'))
-plot(ego_g_exclude, vertex.size = 15, vertex.label.cex= 0.6, edge.arrow.size = 0.5)
+plot(ego_g_exclude, vertex.size = 15, vertex.label.cex= 0.6)
 
 ### 특정한 노드를 중심으로한 자아 중심 연결망을 구축
 #### 먼저, 각 노드의 이름을 정해주기
@@ -194,7 +196,6 @@ dev.off()
 
 ### 공개된 연결망 자료 활용하기 
 #### networkdata 패키지 설치하여 데이터 살펴보기 
-install.packages('remotes')
 remotes::install_github('schochastics/networkdata')
 data(package = 'networkdata')
 
